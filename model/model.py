@@ -6,7 +6,9 @@ from transformers import AutoModel
 
 
 class NNEModel(BaseModel):
+    
     def __init__(self, num_classes, num_layers, lm_path):
+
         super(NNEModel, self).__init__()
         self.path_lm = lm_path
         self.num_layers = num_layers
@@ -43,6 +45,7 @@ class NNEModel(BaseModel):
         return x
 
 class Decoder(nn.Module):
+
     def __init__(self, hidden_size, num_classes) -> None:
         super(Decoder, self).__init__()
         self.hidden_size = hidden_size
