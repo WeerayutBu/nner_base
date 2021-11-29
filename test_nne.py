@@ -1,4 +1,4 @@
-import json
+import json, os
 import torch
 import argparse
 from tqdm import tqdm
@@ -67,7 +67,7 @@ def main(config):
     logger.info('Loading checkpoint: {} ...'.format(config.resume))
     checkpoint = torch.load(config.resume)
     state_dict = checkpoint['state_dict']
-    if config['n_gpu'] > 1:
+    if config['n_gpu']>1 and torch.cuda.device_count()>1:
         model = torch.nn.DataParallel(model)
     model.load_state_dict(state_dict)
     layers_train = config._config['trainer']['layers_train']
@@ -79,77 +79,6 @@ def main(config):
 
     total_loss = 0.0
     total_metrics = torch.zeros(len(metric_fns))
-
-    # results = []
-    # with torch.no_grad():
-    #     for batch_idx, instance in enumerate(test_data_loader):
-    #         input_ids = torch.tensor(instance['input_ids']).to(device)
-    #         attention_mask = torch.tensor(instance['attention_mask']).to(device)
-    #         batch_size = input_ids.shape[0]
-
-    #         # Processing output
-    #         output = model(input_ids, attention_mask)
-
-    #         # Calculate loss
-    #         nested_lm_conll_ids = {l:None for l in range(len(layers_train))}
-    #         for index, layer in enumerate(layers_train):
-    #             temp_nested_lm_conll_ids = instance['nested_lm_conll_ids'][layer]
-    #             nested_lm_conll_ids[index]=torch.tensor(temp_nested_lm_conll_ids).to(device)
-
-    #         loss = 0
-    #         for index in range(len(layers_train)):
-    #             loss+=criterion(output[index], nested_lm_conll_ids[layer])
-    #         total_loss += loss.item() * batch_size
-
-    #         # Collection data
-    #         predictions = {x:[] for x in range(batch_size)}
-    #         lm_entities = {x:[] for x in range(batch_size)}
-    #         for sent_ids in range(batch_size):
-    #             for layer in range(len(output)):
-    #                 predictions[sent_ids].append(output[layer][sent_ids].argmax(axis=0))
-    #                 lm_entities[sent_ids].append(instance['nested_lm_conll_ids'][layer][sent_ids])
-            
-    #         # save sample images, or do something with output here
-    #         for sent_ids in range(batch_size):
-
-    #             # Input text
-    #             tokens = instance['lm_tokens'][sent_ids]
-    #             tokens = [w for w in tokens if w!=PAD]
-
-    #             preds = []
-    #             for index in range(len(layers_train)):
-    #                 preds+=get_dict_prediction(
-    #                         tokens, 
-    #                         predictions[sent_ids][index], 
-    #                         attention_mask[sent_ids], 
-    #                         data_loader.ids2tag)
-
-    #             entities_labels = []
-    #             for index in range(len(layers_train)):
-    #                 entities_labels+=get_dict_prediction(
-    #                         tokens, 
-    #                         torch.tensor(lm_entities[sent_ids][index]), 
-    #                         attention_mask[sent_ids], 
-    #                         data_loader.ids2tag)
-
-    #             # Keep results
-    #             results.append({
-    #                     'sentence_id': instance['sentence_id'][sent_ids],
-    #                     'tokens': tokens,
-    #                     'entities': entities_labels,
-    #                     'predictions':preds
-    #             })
-                
-    #             # Metrix accuracy
-    #             for i, metric in enumerate(metric_fns):
-    #                 total_metrics[i] += metric( 
-    #                         output, 
-    #                         nested_lm_conll_ids, 
-    #                         attention_mask, 
-    #                         data_loader.boundary_type,
-    #                         info=False,
-    #                         ids2tag=data_loader.ids2tag
-    #                 ) * batch_size       
 
     results = []
     with torch.no_grad():
@@ -192,7 +121,7 @@ def main(config):
                             tokens, 
                             predictions[sent_ids][index], 
                             attention_mask[sent_ids], 
-                            data_loader.ids2tag)
+                            dataloader.ids2tag)
 
                 entities_labels = []
                 for index in range(len(layers_train)):
@@ -200,7 +129,7 @@ def main(config):
                             tokens, 
                             lm_entities[sent_ids][index], 
                             attention_mask[sent_ids], 
-                            data_loader.ids2tag)
+                            dataloader.ids2tag)
 
                 # Keep results
                 results.append({
@@ -216,12 +145,12 @@ def main(config):
                             output, 
                             nested_lm_conll_ids, 
                             attention_mask, 
-                            data_loader.boundary_type,
+                            dataloader.boundary_type,
                             info=False,
-                            ids2tag=data_loader.ids2tag
+                            ids2tag=dataloader.ids2tag
                     ) * batch_size    
 
-    n_samples = len(data_loader.test)
+    n_samples = len(dataloader.test)
     log = {'loss': total_loss / n_samples}
     log.update({
         met.__name__: total_metrics[i].item() / n_samples for i, met in enumerate(metric_fns)
@@ -230,9 +159,18 @@ def main(config):
 
     # Save predictions
     checkpoint_id = str(config.resume).split('/')[-2]
-    path = f"outputs/preds_{config._config['name']}_{checkpoint_id}"
+    path_storage = "/home/weerayut/Workspace/storage"
+    path_dir = f"{path_storage}/checkpoints/nner_base/outputs"
+
+    # Check whether the specified path exists or not
+    isExist = os.path.exists(path_dir)
+    if not isExist:
+        # Create a new directory because it does not exist 
+        os.makedirs(path_dir)
+        print("The new directory is created!")
 
     # Save json
+    path = f"{path_dir}/preds_{config._config['name']}_{checkpoint_id}"
     with open(path+".json", 'w') as F:
         json.dump(results, F)
     print(f"Saved at: {path}")

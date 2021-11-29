@@ -18,10 +18,10 @@
             "lm_path":"/home/weerayut/Workspace/storage/embedding/airesearch/wangchanberta-base-att-spm-uncased",
             "boundary_type":"BIESO",
             "max_sent_length":512,
-            "batch_size": 3,
+            "batch_size": 2,
             "max_layers": 8,
             "shuffle": true,
-            "sample_data": true,
+            "sample_data": false,
             "debug":false
         }
     },
@@ -48,7 +48,7 @@
         "type":"TrainerNNE",
         "epochs": 500,
         "verbosity": 2,
-        "save_dir": "/home/weerayut/Workspace/storage/checkpoints/NNER",
+        "save_dir": "/home/weerayut/Workspace/storage/checkpoints/nner_base",
         "monitor": "max val_nne_conll_eval",
         "save_period": 1,
         "early_stop": 16,

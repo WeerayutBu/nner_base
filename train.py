@@ -20,7 +20,8 @@ np.random.seed(SEED)
 
 def main(config):
     logger = config.get_logger('train')
-
+    logger.info(f"SEED: {SEED}")
+    
     # setup data_loader instances
     data_loader = config.init_obj('dataloader', module_data)
     
@@ -31,7 +32,7 @@ def main(config):
     # prepare for (multi-device) GPU training
     device, device_ids = prepare_device(config['n_gpu'])
     model = model.to(device)
-    if len(device_ids) > 1:
+    if len(device_ids)>1 and torch.cuda.device_count()>1:
         model = torch.nn.DataParallel(model, device_ids=device_ids)
 
     # get function handles of loss, metrics and trainer
@@ -52,9 +53,8 @@ def main(config):
         config=config, 
         device=device,
         lr_scheduler=lr_scheduler,
-        data_loader=data_loader
-    )
-    
+        data_loader=data_loader)
+
     trainer.train()
 
 if __name__ == '__main__':
