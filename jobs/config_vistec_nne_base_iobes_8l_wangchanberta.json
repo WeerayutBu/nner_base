@@ -1,5 +1,5 @@
 {
-    "name": "vistec_nne_BIESO_8L",
+    "name": "vistec_nne_base_iobes_8l_wangchanberta",
     "n_gpu": 4,
 
     "arch": {
@@ -7,18 +7,18 @@
         "args": {
             "num_classes":417,
             "num_layers": 8,
-            "lm_path":"/home/weerayut/Workspace/storage/embedding/airesearch/wangchanberta-base-att-spm-uncased"
+            "lm_path":"/ist/ist-share/scads/fame/storage/embedding/airesearch/wangchanberta-base-att-spm-uncased"
         }
     },
 
     "dataloader": {
         "type": "NERDataloader",
         "args":{
-            "path_data": "/home/weerayut/Workspace/storage/cache/corpora/vistec",
-            "lm_path":"/home/weerayut/Workspace/storage/embedding/airesearch/wangchanberta-base-att-spm-uncased",
+            "path_data": "/ist/ist-share/scads/fame/storage/cache/corpora/vistec",
+            "lm_path":"/ist/ist-share/scads/fame/storage/embedding/airesearch/wangchanberta-base-att-spm-uncased",
             "boundary_type":"BIESO",
             "max_sent_length":512,
-            "batch_size": 2,
+            "batch_size": 16,
             "max_layers": 8,
             "shuffle": true,
             "sample_data": false,
@@ -48,7 +48,7 @@
         "type":"TrainerNNE",
         "epochs": 500,
         "verbosity": 2,
-        "save_dir": "/home/weerayut/Workspace/storage/checkpoints/nner_base",
+        "save_dir": "/ist/ist-share/scads/fame/storage/checkpoints/nner_base",
         "monitor": "max val_nne_conll_eval",
         "save_period": 1,
         "early_stop": 16,
