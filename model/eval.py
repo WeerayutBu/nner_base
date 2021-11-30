@@ -54,8 +54,8 @@ class ClassEvaluator():
         all_tags = set(results['counts_labels'].keys())
         all_tags.update(set(results['counts_predictions'].keys()))
 
-        if self.check_tags:
-            self._check_tag(all_tags)
+        # if self.check_tags:
+        #     self._check_tag(all_tags)
         
         # Each classes 
         for tag in all_tags:
@@ -259,8 +259,8 @@ class ClassEvaluator():
         all_tags.update(set(results['counts_predictions'].keys()))
 
         # Check groups tag and dataset tag
-        if self.check_tags:
-            self._check_tag(all_tags)
+        # if self.check_tags:
+        #     self._check_tag(all_tags)
         
         for index, group in enumerate([group1, group2, group3]):
         
