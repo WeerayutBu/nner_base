@@ -1,7 +1,5 @@
 import numpy as np
-import sys
-sys.path.append('/home/weerayut/Workspace/nner_helper/scripts')
-from span2conll import Span2conll
+from utils.span2conll import Span2conll
 from utils.correcting_labels import fix_labels, remove_incorrect_tag     
 
 class CONLLLabels():
